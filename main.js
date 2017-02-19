@@ -5,6 +5,13 @@ const Discordie = require("discordie");
 
 const client = new Discordie();
 
+function getTimeFormat(date) {
+    const dateinfo = date.toString().split(" ").splice(1, 5);
+    const timeZone = dateinfo.pop();
+    const time = dateinfo.pop();
+    return `${dateinfo.join("/")} at ${time} (${timeZone})`;
+}
+
 client.Dispatcher.on(Discordie.Events.GATEWAY_READY, ( ) => {
     console.log("connected to Discord");
 });
@@ -19,8 +26,9 @@ client.Dispatcher.on(Discordie.Events.MESSAGE_CREATE, e => {
     const content = e.message.resolveContent();
     const author = e.message.author;
     const authorName = messageGuild.members.find(member => member.id === author.id).name;
+    const time = getTimeFormat(new Date());
 
-    console.log(`${authorName} said: ${content}`);
+    console.log(`[${time}] ${authorName} said: ${content}`);
 });
 
 client.connect(settings);
