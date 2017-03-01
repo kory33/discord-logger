@@ -11,6 +11,7 @@ if (!fs.existsSync(cache_dir)) {
 }
 
 const client = new Discordie();
+let reconnect_interval = 1;
 
 function getTimeFormat(date) {
     const dateinfo = date.toString().split(" ").splice(1, 5);
@@ -76,6 +77,7 @@ function processMessage(e) {
 }
 
 client.Dispatcher.on(Discordie.Events.GATEWAY_READY, ( ) => {
+    reconnect_interval = 1;
     console.log("connected to Discord");
 });
 
@@ -90,6 +92,7 @@ client.Dispatcher.on(Discordie.Events.DISCONNECTED, e => {
         setTimeout(() => {
             client.connect(settings);
             resolve();
-        }, 10000);
+    }, reconnect_interval * 1000);
+        reconnect_interval *= 2;
     });
 });
