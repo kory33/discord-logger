@@ -2,6 +2,13 @@
 
 const settings = require("./.settings.json");
 const Discordie = require("discordie");
+const rp = require("request-promise");
+const fs = require("fs");
+
+const cache_dir = __dirname + "/cache";
+if (!fs.existsSync(cache_dir)) {
+    fs.mkdirSync(cache_dir);
+}
 
 const client = new Discordie();
 
@@ -12,11 +19,7 @@ function getTimeFormat(date) {
     return `${dateinfo.join("/")} at ${time} (${timeZone})`;
 }
 
-client.Dispatcher.on(Discordie.Events.GATEWAY_READY, ( ) => {
-    console.log("connected to Discord");
-});
-
-client.Dispatcher.on(Discordie.Events.MESSAGE_CREATE, e => {
+function processMessage(e) {
     const messageGuild = e.message.guild;
 
     if(client.User.getVoiceChannel(messageGuild) === null) {
@@ -29,7 +32,25 @@ client.Dispatcher.on(Discordie.Events.MESSAGE_CREATE, e => {
     const time = getTimeFormat(new Date());
 
     console.log(`[${time}] ${authorName} said: ${content}`);
+
+    const attachments = e.message.attachments;
+    if (!attachments.length) {
+        return;
+    }
+
+    // cache attachments
+    for (let i = 0; i < attachments.length; i++) {
+        const attachment = attachments[i];
+        rp.get(attachment.url).pipe(fs.createWriteStream(`${cache_dir}/${attachment.filename}`));
+        console.log("cached attachment: " + attachment.filename);
+    }
+}
+
+client.Dispatcher.on(Discordie.Events.GATEWAY_READY, ( ) => {
+    console.log("connected to Discord");
 });
+
+client.Dispatcher.on(Discordie.Events.MESSAGE_CREATE, e => processMessage(e));
 
 client.connect(settings);
 
