@@ -19,6 +19,26 @@ function getTimeFormat(date) {
     return `${dateinfo.join("/")} at ${time} (${timeZone})`;
 }
 
+function getFilename(original_file_name) {
+    const date = new Date();
+
+    let name = "";
+    name += date.getFullYear();
+    name += ("0" + date.getMonth()).slice(-2);
+    name += ("0" + date.getDate()).slice(-2);
+    name += "_";
+    name += ("0" + date.getHours()).slice(-2);
+    name += ("0" + date.getMinutes()).slice(-2);
+    name += ("0" + date.getSeconds()).slice(-2);
+
+    return name;
+}
+
+function getFileExt(original_file_name) {
+    const ext_match = original_file_name.match(/\.([^\.]*$)/)[1];
+    return ext_match ? "." + ext_match : "";
+}
+
 function processMessage(e) {
     const messageGuild = e.message.guild;
 
@@ -41,8 +61,17 @@ function processMessage(e) {
     // cache attachments
     for (let i = 0; i < attachments.length; i++) {
         const attachment = attachments[i];
-        rp.get(attachment.url).pipe(fs.createWriteStream(`${cache_dir}/${attachment.filename}`));
-        console.log("cached attachment: " + attachment.filename);
+
+        let targetFileName = getFilename(attachment.filename);
+
+        if (attachments.length !== 1) {
+            targetFileName += "_" + i;
+        }
+
+        targetFileName += getFileExt(attachment.filename);
+
+        rp.get(attachment.url).pipe(fs.createWriteStream(`${cache_dir}/${targetFileName}`));
+        console.log(`cached attachment: ${targetFileName}`);
     }
 }
 
