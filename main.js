@@ -96,3 +96,5 @@ client.Dispatcher.on(Discordie.Events.DISCONNECTED, e => {
         reconnect_interval *= 2;
     });
 });
+
+process.on("beforeExit", () => client.connect(settings));
