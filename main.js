@@ -40,10 +40,10 @@ function getFileExt(original_file_name) {
     return ext_match ? "." + ext_match : "";
 }
 
-function processMessage(e) {
+function processMessageCreate(e) {
     const messageGuild = e.message.guild;
 
-    if(client.User.getVoiceChannel(messageGuild) === null) {
+    if (client.User.getVoiceChannel(messageGuild) === null) {
         return;
     }
 
@@ -76,12 +76,29 @@ function processMessage(e) {
     }
 }
 
-client.Dispatcher.on(Discordie.Events.GATEWAY_READY, ( ) => {
+function processMessageUpdate(e) {
+    const messageGuild = e.message.guild;
+
+    if (client.User.getVoiceChannel(messageGuild) === null) {
+        return;
+    }
+
+    const content = e.message.resolveContent();
+    const author = e.message.author;
+    const authorName = messageGuild.members.find(member => member.id === author.id).name;
+    const time = getTimeFormat(new Date());
+
+    console.log(`[${time}] ${authorName} updated the message to: ${content}`);
+}
+
+client.Dispatcher.on(Discordie.Events.GATEWAY_READY, () => {
     reconnect_interval = 1;
     console.log("connected to Discord");
 });
 
-client.Dispatcher.on(Discordie.Events.MESSAGE_CREATE, e => processMessage(e));
+client.Dispatcher.on(Discordie.Events.MESSAGE_CREATE, e => processMessageCreate(e));
+
+client.Dispatcher.on(Discordie.Events.MESSAGE_UPDATE, e => processMessageUpdate(e))
 
 client.connect(settings);
 
@@ -92,7 +109,7 @@ client.Dispatcher.on(Discordie.Events.DISCONNECTED, e => {
         setTimeout(() => {
             client.connect(settings);
             resolve();
-    }, reconnect_interval * 1000);
+        }, reconnect_interval * 1000);
         reconnect_interval *= 2;
     });
 });
