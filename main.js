@@ -49,17 +49,11 @@ function getMessageInformation(message) {
     return { "time": time, "authorName": authorName, "content": content };
 }
 
-function processMessageCreate(e) {
-    const messageGuild = e.message.guild;
+function shouldLog(event) {
+    return client.User.getVoiceChannel(e.message.guild) !== null;
+}
 
-    if (client.User.getVoiceChannel(messageGuild) === null) {
-        return;
-    }
-
-    const time, authorName, connect = getMessageInformation(e.message);
-    console.log(`[${time}] ${authorName} said: ${content}`);
-
-    const attachments = e.message.attachments;
+function processAttachments(attachments) {
     if (!attachments.length) {
         return;
     }
@@ -81,10 +75,19 @@ function processMessageCreate(e) {
     }
 }
 
-function processMessageUpdate(e) {
-    const messageGuild = e.message.guild;
+function processMessageCreate(e) {
+    if (!shouldLog(e)) {
+        return;
+    }
 
-    if (client.User.getVoiceChannel(messageGuild) === null) {
+    const time, authorName, connect = getMessageInformation(e.message);
+    console.log(`[${time}] ${authorName} said: ${content}`);
+
+    processAttachments(e.message.attachments);
+}
+
+function processMessageUpdate(e) {
+    if (!shouldLog(e)) {
         return;
     }
 
