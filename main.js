@@ -51,9 +51,8 @@ function getMessageInformation(message) {
 }
 
 function shouldLog(message) {
-    const guild = message.guild;
-    if (guild === null) return;
-    return client.User.getVoiceChannel(guild) !== null;
+    if (message === null) return false;
+    return client.User.getVoiceChannel(message.guild) !== null;
 }
 
 function processAttachments(attachments) {
@@ -101,6 +100,15 @@ client.Dispatcher.on(Discordie.Events.MESSAGE_UPDATE, e => {
 
     const { time, authorName, content } = getMessageInformation(e.message);
     console.log(`[${time}] ${authorName} updated the message to: ${content}`.yellow);
+});
+
+client.Dispatcher.on(Discordie.Events.MESSAGE_DELETE, e => {
+    if (!shouldLog(e.message)) {
+        return;
+    }
+
+    const { time, authorName, content } = getMessageInformation(e.message);
+    console.log(`[${time}] ${authorName} deleted the message: ${content}`.red);
 });
 
 client.connect(settings);
