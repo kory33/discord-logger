@@ -40,6 +40,15 @@ function getFileExt(original_file_name) {
     return ext_match ? "." + ext_match : "";
 }
 
+function getMessageInformation(message) {
+    const content = message.resolveContent();
+    const author = message.author;
+    const authorName = messageGuild.members.find(member => member.id === author.id).name;
+    const time = getTimeFormat(new Date());
+
+    return { "time": time, "authorName": authorName, "content": content };
+}
+
 function processMessageCreate(e) {
     const messageGuild = e.message.guild;
 
@@ -47,11 +56,7 @@ function processMessageCreate(e) {
         return;
     }
 
-    const content = e.message.resolveContent();
-    const author = e.message.author;
-    const authorName = messageGuild.members.find(member => member.id === author.id).name;
-    const time = getTimeFormat(new Date());
-
+    const time, authorName, connect = getMessageInformation(e.message);
     console.log(`[${time}] ${authorName} said: ${content}`);
 
     const attachments = e.message.attachments;
@@ -83,11 +88,7 @@ function processMessageUpdate(e) {
         return;
     }
 
-    const content = e.message.resolveContent();
-    const author = e.message.author;
-    const authorName = messageGuild.members.find(member => member.id === author.id).name;
-    const time = getTimeFormat(new Date());
-
+    const time, authorName, connect = getMessageInformation(e.message);
     console.log(`[${time}] ${authorName} updated the message to: ${content}`);
 }
 
