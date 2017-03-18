@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/Kory33/discord-logger#readme",
   "dependencies": {
+    "color": "^1.0.3",
     "discordie": "^0.11.0",
     "request": "^2.79.0",
     "request-promise": "^4.1.1"

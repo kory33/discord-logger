@@ -4,6 +4,7 @@ const settings = require("./.settings.json");
 const Discordie = require("discordie");
 const rp = require("request-promise");
 const fs = require("fs");
+const colors = require("colors");
 
 const cache_dir = __dirname + "/cache";
 if (!fs.existsSync(cache_dir)) {
@@ -50,7 +51,9 @@ function getMessageInformation(message) {
 }
 
 function shouldLog(message) {
-    return client.User.getVoiceChannel(message.guild) !== null;
+    const guild = message.guild;
+    if (guild === null) return;
+    return client.User.getVoiceChannel(guild) !== null;
 }
 
 function processAttachments(attachments) {
@@ -86,7 +89,7 @@ client.Dispatcher.on(Discordie.Events.MESSAGE_CREATE, e => {
     }
 
     const { time, authorName, content } = getMessageInformation(e.message);
-    console.log(`[${time}] ${authorName} said: ${content}`);
+    console.log(`[${time}] ${authorName} said: ${content}`.green);
 
     processAttachments(e.message.attachments);
 });
@@ -97,7 +100,7 @@ client.Dispatcher.on(Discordie.Events.MESSAGE_UPDATE, e => {
     }
 
     const { time, authorName, content } = getMessageInformation(e.message);
-    console.log(`[${time}] ${authorName} updated the message to: ${content}`);
+    console.log(`[${time}] ${authorName} updated the message to: ${content}`.yellow);
 });
 
 client.connect(settings);
