@@ -43,14 +43,14 @@ function getFileExt(original_file_name) {
 function getMessageInformation(message) {
     const content = message.resolveContent();
     const author = message.author;
-    const authorName = messageGuild.members.find(member => member.id === author.id).name;
+    const authorName = message.guild.members.find(member => member.id === author.id).name;
     const time = getTimeFormat(new Date());
 
     return { "time": time, "authorName": authorName, "content": content };
 }
 
-function shouldLog(event) {
-    return client.User.getVoiceChannel(e.message.guild) !== null;
+function shouldLog(message) {
+    return client.User.getVoiceChannel(message.guild) !== null;
 }
 
 function processAttachments(attachments) {
@@ -75,34 +75,30 @@ function processAttachments(attachments) {
     }
 }
 
-function processMessageCreate(e) {
-    if (!shouldLog(e)) {
-        return;
-    }
-
-    const time, authorName, connect = getMessageInformation(e.message);
-    console.log(`[${time}] ${authorName} said: ${content}`);
-
-    processAttachments(e.message.attachments);
-}
-
-function processMessageUpdate(e) {
-    if (!shouldLog(e)) {
-        return;
-    }
-
-    const time, authorName, connect = getMessageInformation(e.message);
-    console.log(`[${time}] ${authorName} updated the message to: ${content}`);
-}
-
 client.Dispatcher.on(Discordie.Events.GATEWAY_READY, () => {
     reconnect_interval = 1;
     console.log("connected to Discord");
 });
 
-client.Dispatcher.on(Discordie.Events.MESSAGE_CREATE, e => processMessageCreate(e));
+client.Dispatcher.on(Discordie.Events.MESSAGE_CREATE, e => {
+    if (!shouldLog(e.message)) {
+        return;
+    }
 
-client.Dispatcher.on(Discordie.Events.MESSAGE_UPDATE, e => processMessageUpdate(e))
+    const { time, authorName, content } = getMessageInformation(e.message);
+    console.log(`[${time}] ${authorName} said: ${content}`);
+
+    processAttachments(e.message.attachments);
+});
+
+client.Dispatcher.on(Discordie.Events.MESSAGE_UPDATE, e => {
+    if (!shouldLog(e.message)) {
+        return;
+    }
+
+    const { time, authorName, content } = getMessageInformation(e.message);
+    console.log(`[${time}] ${authorName} updated the message to: ${content}`);
+});
 
 client.connect(settings);
 
