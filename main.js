@@ -43,8 +43,13 @@ function getFileExt(original_file_name) {
 
 function getMessageInformation(message) {
     const content = message.resolveContent();
-    const author = message.author;
-    const authorName = message.guild.members.find(member => member.id === author.id).name;
+    const author = message.guild.members.find(member => member.id === message.author.id);
+
+    if (author === null || author === undefined) {
+        return undefined;
+    }
+
+    const authorName = author.name;
     const time = getTimeFormat(new Date());
 
     return { "time": time, "authorName": authorName, "content": content };
@@ -87,7 +92,11 @@ client.Dispatcher.on(Discordie.Events.MESSAGE_CREATE, e => {
         return;
     }
 
-    const { time, authorName, content } = getMessageInformation(e.message);
+    const messageInfo = getMessageInformation(e.message);
+    if (messageInfo === undefined) {
+        return;
+    }
+    const { time, authorName, content } = messageInfo
     console.log(`[${time}] ${authorName} said: ${content}`.green);
 
     processAttachments(e.message.attachments);
@@ -98,7 +107,11 @@ client.Dispatcher.on(Discordie.Events.MESSAGE_UPDATE, e => {
         return;
     }
 
-    const { time, authorName, content } = getMessageInformation(e.message);
+    const messageInfo = getMessageInformation(e.message);
+    if (messageInfo === undefined) {
+        return;
+    }
+    const { time, authorName, content } = messageInfo
     console.log(`[${time}] ${authorName} updated the message to: ${content}`.yellow);
 });
 
@@ -107,21 +120,26 @@ client.Dispatcher.on(Discordie.Events.MESSAGE_DELETE, e => {
         return;
     }
 
-    const { time, authorName, content } = getMessageInformation(e.message);
+    const messageInfo = getMessageInformation(e.message);
+    if (messageInfo === undefined) {
+        return;
+    }
+    const { time, authorName, content } = messageInfo
     console.log(`[${time}] ${authorName} deleted the message: ${content}`.red);
 });
 
 client.connect(settings);
 
 client.Dispatcher.on(Discordie.Events.DISCONNECTED, e => {
-    console.log(e);
-    console.log("Disconnected from Discord... Trying to reconnect in 10 seconds");
+    const reconnectTime = reconnect_interval * 1000;
+    reconnect_interval *= 2;
+
+    console.log(`Disconnected from Discord... Trying to reconnect in ${reconnectTime / 1000} seconds`);
     return new Promise((resolve) => {
         setTimeout(() => {
             client.connect(settings);
             resolve();
-        }, reconnect_interval * 1000);
-        reconnect_interval *= 2;
+        }, reconnectTime);
     });
 });
 
