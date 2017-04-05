@@ -97,7 +97,7 @@ client.Dispatcher.on(Discordie.Events.MESSAGE_CREATE, e => {
         return;
     }
     const { time, authorName, content } = messageInfo
-    console.log(`[${time}] ${authorName} said: ${content}`.green);
+    console.log(`[${time} | ${e.message.id}] ${authorName} said: ${content}`.green);
 
     processAttachments(e.message.attachments);
 });
@@ -112,7 +112,7 @@ client.Dispatcher.on(Discordie.Events.MESSAGE_UPDATE, e => {
         return;
     }
     const { time, authorName, content } = messageInfo
-    console.log(`[${time}] ${authorName} updated the message to: ${content}`.yellow);
+    console.log(`[${time} | ${e.message.id}] ${authorName} updated the message to: ${content}`.yellow);
 });
 
 client.Dispatcher.on(Discordie.Events.MESSAGE_DELETE, e => {
@@ -125,7 +125,7 @@ client.Dispatcher.on(Discordie.Events.MESSAGE_DELETE, e => {
         return;
     }
     const { time, authorName, content } = messageInfo
-    console.log(`[${time}] ${authorName} deleted the message: ${content}`.red);
+    console.log(`[${time} | ${e.message.id}] ${authorName} deleted the message: ${content}`.red);
 });
 
 client.connect(settings);
